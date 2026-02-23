@@ -10,7 +10,7 @@
  * @see https://pris.ly/d/config-datasource
  */
 import "dotenv/config";
-import { defineConfig, env } from "prisma/config";
+import { defineConfig } from "prisma/config";
 
 export default defineConfig({
   schema: "prisma/schema.prisma",
@@ -19,7 +19,8 @@ export default defineConfig({
     seed: "npx tsx prisma/seed.ts",
   },
   datasource: {
-    // Attempt Prisma native env, fallback to Node injected env (Vercel)
-    url: env("DIRECT_URL") || process.env.DIRECT_URL || process.env.DATABASE_URL,
+    // Rely exclusively on Node process environment for Vercel/Cloud support
+    // (Prisma's internal env wrapper throws hard errors if variables vanish in CI)
+    url: process.env.DIRECT_URL || process.env.DATABASE_URL || "",
   },
 });
