@@ -614,7 +614,7 @@ function Protocol() {
                     animation: gsap.to(card, {
                         scale: 0.92,
                         filter: 'brightness(0.6)', // Replaced heavy blur to fix mobile rendering glitch
-                        opacity: 0.4,
+                        opacity: 0, // Fades exactly to 0 preventing underlying text bleed
                         ease: 'none',
                     }),
                 });
