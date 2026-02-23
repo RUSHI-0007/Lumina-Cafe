@@ -718,7 +718,7 @@ function Protocol() {
             {/* Card 3 */}
             <div
                 ref={(el) => { cardsRef.current[2] = el; }}
-                className="h-screen w-full flex items-center justify-center bg-[#DFDDD6] text-charcoal top-0 origin-top z-30 shadow-[0_-20px_50px_rgba(0,0,0,0.1)]"
+                className="h-screen w-full flex items-center justify-center bg-[#DFDDD6] text-charcoal sticky top-0 origin-top z-30 shadow-[0_-20px_50px_rgba(0,0,0,0.1)]"
             >
                 <div className="max-w-4xl w-full px-8 flex flex-col md:flex-row items-center gap-16">
                     <div className="flex-1">
