@@ -1,0 +1,165 @@
+// ─── Lumina Café — Prisma Schema ───
+// Products (Menu), Orders (Status-tracked), Reservations (Calendar-aware)
+// Users (Clerk-auth, Loyalty), Subscriptions (Coffee delivery)
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── ENUMS ───
+
+enum ProductCategory {
+  ESPRESSO
+  POUR_OVER
+  COLD_BREW
+  PASTRY
+  SEASONAL
+  MERCHANDISE
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  CONFIRMED
+  PREPARING
+  READY
+  COMPLETED
+  CANCELLED
+}
+
+enum ReservationStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+  NO_SHOW
+}
+
+enum SubscriptionFrequency {
+  WEEKLY
+  BI_WEEKLY
+  MONTHLY
+}
+
+enum EventType {
+  STANDARD
+  TASTING_ROOM
+}
+
+// ─── MODELS ───
+
+/// Customer profile linked to Clerk authentication
+model User {
+  id            String   @id @default(cuid())
+  clerkId       String   @unique
+  email         String   @unique
+  name          String?
+  imageUrl      String?
+  loyaltyPoints Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  orders        Order[]
+  subscriptions Subscription[]
+
+  @@map("users")
+}
+
+/// Coffee subscription with delivery frequency
+model Subscription {
+  id        String                @id @default(cuid())
+  frequency SubscriptionFrequency
+  isActive  Boolean               @default(true)
+  createdAt DateTime              @default(now())
+  updatedAt DateTime              @updatedAt
+
+  userId    String
+  user      User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("subscriptions")
+}
+
+/// Menu item available at Lumina Café
+model Product {
+  id          String          @id @default(cuid())
+  name        String
+  description String
+  price       Decimal         @db.Decimal(10, 2)
+  category    ProductCategory
+  imageUrl    String?
+  isSoldOut   Boolean         @default(false)
+  isFeatured  Boolean         @default(false)
+  sortOrder   Int             @default(0)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  orderItems  OrderItem[]
+
+  @@index([category])
+  @@index([isSoldOut])
+  @@map("products")
+}
+
+/// Customer order with status tracking
+model Order {
+  id            String      @id @default(cuid())
+  customerName  String
+  customerEmail String?
+  status        OrderStatus @default(PENDING)
+  totalAmount   Decimal     @db.Decimal(10, 2)
+  notes         String?
+  isFavorite    Boolean     @default(false)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  userId        String?
+  user          User?       @relation(fields: [userId], references: [id])
+
+  items         OrderItem[]
+
+  @@index([status])
+  @@index([createdAt])
+  @@index([userId])
+  @@map("orders")
+}
+
+/// Individual line item within an order
+model OrderItem {
+  id        String  @id @default(cuid())
+  quantity  Int
+  unitPrice Decimal @db.Decimal(10, 2)
+
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+
+  @@map("order_items")
+}
+
+/// Table/tasting room reservation with calendar awareness
+model Reservation {
+  id              String            @id @default(cuid())
+  guestName       String
+  guestEmail      String
+  guestPhone      String?
+  partySize       Int
+  date            DateTime          @db.Date
+  timeSlot        String            // e.g. "14:00", "16:00"
+  status          ReservationStatus @default(PENDING)
+  eventType       EventType         @default(STANDARD)
+  specialRequests String?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  @@index([date, timeSlot])
+  @@index([status])
+  @@map("reservations")
+}
