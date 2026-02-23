@@ -19,6 +19,7 @@ export default defineConfig({
     seed: "npx tsx prisma/seed.ts",
   },
   datasource: {
-    url: env("DIRECT_URL"),
+    // Attempt Prisma native env, fallback to Node injected env (Vercel)
+    url: env("DIRECT_URL") || process.env.DIRECT_URL || process.env.DATABASE_URL,
   },
 });
