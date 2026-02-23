@@ -607,17 +607,14 @@ function Protocol() {
                 if (i === cards.length - 1) return;
 
                 ScrollTrigger.create({
-                    trigger: card,
-                    start: 'top top',
-                    endTrigger: cards[i + 1],
-                    end: 'top 90%',
-                    pin: true,
-                    pinSpacing: false,
-                    scrub: true,
+                    trigger: cards[i + 1],
+                    start: 'top bottom',
+                    end: 'top top',
+                    scrub: 1, // Smooth scrub
                     animation: gsap.to(card, {
-                        scale: 0.9,
-                        filter: 'blur(20px)',
-                        opacity: 0.5,
+                        scale: 0.92,
+                        filter: 'brightness(0.6)', // Replaced heavy blur to fix mobile rendering glitch
+                        opacity: 0.4,
                         ease: 'none',
                     }),
                 });
